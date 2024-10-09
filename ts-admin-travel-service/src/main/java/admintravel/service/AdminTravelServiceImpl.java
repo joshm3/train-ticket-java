@@ -277,6 +277,11 @@ public class AdminTravelServiceImpl implements AdminTravelService {
                 requestEntity,
                 Response.class);
         Response result = re.getBody();
+        AdminTravelServiceImpl.LOGGER.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        AdminTravelServiceImpl.LOGGER.info(result.getClass().toString());
+        AdminTravelServiceImpl.LOGGER.info(result.toString());
+        AdminTravelServiceImpl.LOGGER.info(result.getData().toString());
+        AdminTravelServiceImpl.LOGGER.info(result.getData().getClass().toString());
         if ( result.getStatus() == 0) {
             AdminTravelServiceImpl.LOGGER.warn("[getRouteByRouteId][Get Route By Id Failed][Fail msg: {}]", result.getMsg());
             return null;

@@ -1,0 +1,27 @@
+# HTTP Server
+
+server:
+  port: 18888  # HTTP (Tomcat) port
+
+spring:
+  main:
+    web-application-type: reactive
+  application:
+    name: ts-gateway-service
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDRS:127.0.0.1:8848}
+    gateway:
+      routes:
+
+        - id: united-monolith
+          uri: lb://${UNITED_MONOLITH_HOST:ts-united-monolith}
+          predicates:
+            - Path=/**
+            
+            
+            # api/v1/adminuserservice/users/**,/api/v1/userservice/users/**,/api/v1/auth/**,/api/v1/users/**,/api/v1/verifycode/**,/api/v1/foodservice/**,/api/v1/stationfoodservice/**,/api/v1/trainfoodservice/**,/api/v1/consignpriceservice/**,/api/v1/consignservice/**
+            # ,/api/v1/contactservice/**,/api/v1/preserveservice/**,/api/v1/adminbasicservice/**,/api/v1/securityservice/**,/api/v1/assuranceservice/**,/api/v1/preserveotherservice/**,/api/v1/cancelservice/**,/api/v1/executeservice/**,/api/v1/rebookservice/**,/api/v1/travelservice/**
+            # ,/api/v1/travel2service/**,/api/v1/admintravelservice/**,/api/v1/travelplanservice/**,/api/v1/routeplanservice/**,/api/v1/seatservice/**,/api/v1/orderservice/**,/api/v1/orderOtherService/**,/api/v1/adminorderservice/**,/api/v1/inside_pay_service/**
+            # ,/api/v1/paymentservice/**,/api/v1/adminrouteservice/**,/api/v1/configservice/**,/api/v1/basicservice/**,/api/v1/priceservice/**,/api/v1/stationservice/**,/api/v1/trainservice/**,/api/v1/notifyservice/**,/api/v1/routeservice/**,/api/v1/avatar/**

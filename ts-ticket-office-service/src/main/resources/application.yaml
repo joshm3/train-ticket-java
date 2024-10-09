@@ -1,0 +1,24 @@
+server:
+  port: 16108
+spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDRS:nacos-0.nacos-headless.default.svc.cluster.local,nacos-1.nacos-headless.default.svc.cluster.local,nacos-2.nacos-headless.default.svc.cluster.local}
+  application:
+    name: ts-ticket-office-service
+  datasource:
+    url: jdbc:mysql://${TICKET_OFFICE_MYSQL_HOST:ts-ticket-office-mysql}:${TICKET_OFFICE_MYSQL_PORT:3306}/${TICKET_OFFICE_MYSQL_DATABASE:ts-ticket-office-mysql}?useSSL=false
+    username: ${TICKET_OFFICE_MYSQL_USER:root}
+    password: ${TICKET_OFFICE_MYSQL_PASSWORD:Abcd1234#}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL5Dialect
+
+
+swagger:
+  controllerPackage: ticketOffice.controller

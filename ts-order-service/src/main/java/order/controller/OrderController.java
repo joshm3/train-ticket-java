@@ -4,6 +4,10 @@ import edu.fudan.common.entity.Seat;
 import edu.fudan.common.util.StringUtils;
 import order.entity.*;
 import order.service.OrderService;
+import order.voucher.entity.Voucher;
+import order.voucher.service.impl.VoucherService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +15,9 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.Date;
+import java.util.Map;
 
 import static org.springframework.http.ResponseEntity.ok;
 
@@ -24,6 +30,9 @@ public class OrderController {
 
     @Autowired
     private OrderService orderService;
+
+    @Autowired
+    private VoucherService voucherService;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderController.class);
 
@@ -154,6 +163,21 @@ public class OrderController {
         OrderController.LOGGER.info("[getAllOrders][Find All Order]");
         // ArrayList<Order>
         return ok(orderService.getAllOrders(headers));
+    }
+
+
+    @PostMapping(value = "/getVoucher")
+    public HttpEntity<String> getVoucher(@RequestBody Map<String, Object> data, @RequestHeader HttpHeaders headers) throws IOException {
+
+        OrderController.LOGGER.info("[getVoucher][Fetch Voucher][OrderId: {}]", data.get("orderId"));
+
+        String orderId = data.get("orderId").toString();
+        int type = Integer.parseInt(data.get("type").toString());
+
+        Voucher voucher = voucherService.getVoucher(orderId, type);
+        ObjectMapper mapper = new ObjectMapper();
+
+        return ok(mapper.writeValueAsString(voucher));
     }
 
 }

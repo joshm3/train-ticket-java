@@ -1,0 +1,1055 @@
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - 5672:5672
+      - 15672:15672
+    networks:
+      - my-network
+
+  nacos:
+    image: nacos/nacos-server:2.0.1
+    container_name: nacos
+    ports:
+      - "8848:8848" # Default Nacos port
+    environment:
+      MODE: 'standalone'
+      PREFER_HOST_MODE: 'hostname'
+      NACOS_SERVER_IP: '127.0.0.1'
+      MYSQL_SERVICE_PORT: '3306'
+      MYSQL_SERVICE_HOST: 'ts-mysql'
+      MYSQL_SERVICE_DB_NAME: 'nacos'
+      MYSQL_SERVICE_USER: 'root'
+      MYSQL_SERVICE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    networks:
+      - my-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8848/nacos"]
+      timeout: 60s
+      retries: 10
+
+  ts-mysql:
+    image: mysql:5.7
+    command: [ "--max_connections=10000" ]
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes: 
+      - ./init:/docker-entrypoint-initdb.d
+    networks:
+      my-network:
+        aliases:
+          - ts-auth-mysql
+          - ts-user-mysql
+          - ts-route-mysql
+          - ts-contacts-mysql
+          - ts-order-mysql
+          - ts-order-other-mysql
+          - ts-config-mysql
+          - ts-station-mysql
+          - ts-train-mysql
+          - ts-travel-mysql
+          - ts-travel2-mysql
+          - ts-payment-mysql
+          - ts-rebook-mysql
+          - ts-assurance-mysql
+          - ts-notification-mysql
+          - ts-security-mysql
+          - ts-inside-payment-mysql
+          - ts-ticket-office-mysql
+          - ts-news-mysql
+          - ts-voucher-mysql
+          - ts-consign-mysql
+          - ts-consign-price-mysql
+          - ts-food-mysql
+          - ts-delivery-mysql
+          - ts-food-delivery-mysql
+          - ts-gateway-mysql
+          - ts-price-mysql
+          - ts-station-food-mysql
+          - ts-train-food-mysql
+          - ts-wait-order-mysql
+    healthcheck:
+      test: "/usr/bin/mysql --user=root --password=${MYSQL_ROOT_PASSWORD} --execute \"SHOW DATABASES;\""
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+    networks:
+      - my-network
+
+  ts-ui-dashboard:
+    build: ts-ui-dashboard
+    image: ${IMG_REPO}/ts-ui-dashboard:${IMG_TAG}
+    restart: always
+    ports:
+      - 8080:8080
+    networks:
+      - my-network
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-gateway-service:
+    build: ts-gateway-service-java
+    image: ${IMG_REPO}/ts-gateway-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 18888:18888
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-auth-service:
+    build: ts-auth-service
+    image: ${IMG_REPO}/ts-auth-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 12340:12340
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-user-service:
+    build: ts-user-service
+    image: ${IMG_REPO}/ts-user-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 12342:12342
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-verification-code-service:
+    build: ts-verification-code-service
+    image: ${IMG_REPO}/ts-verification-code-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 15678:15678
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-route-service:
+    build: ts-route-service
+    image: ${IMG_REPO}/ts-route-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 11178:11178
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+      ROUTE_MYSQL_HOST: 'ts-route-mysql'
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-contacts-service:
+    build: ts-contacts-service
+    image: ${IMG_REPO}/ts-contacts-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 12347:12347
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-order-service:
+    build: ts-order-service
+    image: ${IMG_REPO}/ts-order-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 12031:12031
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+      ORDER_MYSQL_HOST: 'ts-order-mysql'
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-order-other-service:
+    build: ts-order-other-service
+    image: ${IMG_REPO}/ts-order-other-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 12032:12032
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+      ORDER_OTHER_MYSQL_USER: 'root'
+      ORDER_OTHER_MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-config-service:
+    build: ts-config-service
+    image: ${IMG_REPO}/ts-config-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 15679:15679
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+      CONFIG_MYSQL_USER: 'root'
+      CONFIG_MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-station-service:
+    build: ts-station-service
+    image: ${IMG_REPO}/ts-station-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 12345:12345
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-train-service:
+    build: ts-train-service
+    image: ${IMG_REPO}/ts-train-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 14567:14567
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-travel-service:
+    build: ts-travel-service
+    image: ${IMG_REPO}/ts-travel-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 12346:12346
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+      TRAVEL_MYSQL_USER: 'root'
+      TRAVEL_MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-travel2-service:
+    build: ts-travel2-service
+    image: ${IMG_REPO}/ts-travel2-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 16346:16346
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-preserve-service:
+    build: ts-preserve-service
+    image: ${IMG_REPO}/ts-preserve-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 14568:14568
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-preserve-other-service:
+    build: ts-preserve-other-service
+    image: ${IMG_REPO}/ts-preserve-other-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 14569:14569
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-basic-service:
+    build: ts-basic-service
+    image: ${IMG_REPO}/ts-basic-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 15680:15680
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-price-service:
+    build: ts-price-service
+    image: ${IMG_REPO}/ts-price-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 16579:16579
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+      PRICE_MYSQL_HOST: 'ts-price-mysql'
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-notification-service:
+    build: ts-notification-service
+    image: ${IMG_REPO}/ts-notification-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 17853:17853
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+      NOTIFICATION_MYSQL_USER: 'root'
+      NOTIFICATION_MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-security-service:
+    build: ts-security-service
+    image: ${IMG_REPO}/ts-security-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 11188:11188
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+      SECURITY_MYSQL_USER: 'root'
+      SECURITY_MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-inside-payment-service:
+    build: ts-inside-payment-service
+    image: ${IMG_REPO}/ts-inside-payment-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 18673:18673
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-execute-service:
+    build: ts-execute-service
+    image: ${IMG_REPO}/ts-execute-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 12386:12386
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-payment-service:
+    build: ts-payment-service
+    image: ${IMG_REPO}/ts-payment-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 19001:19001
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-rebook-service:
+    build: ts-rebook-service
+    image: ${IMG_REPO}/ts-rebook-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 18886:18886
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-cancel-service:
+    build: ts-cancel-service
+    image: ${IMG_REPO}/ts-cancel-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 18885:18885
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-assurance-service:
+    build: ts-assurance-service
+    image: ${IMG_REPO}/ts-assurance-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 18889:18889
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+      ASSURANCE_MYSQL_USER: 'root'
+      ASSURANCE_MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-seat-service:
+    build: ts-seat-service
+    image: ${IMG_REPO}/ts-seat-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 18898:18898
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-travel-plan-service:
+    build: ts-travel-plan-service
+    image: ${IMG_REPO}/ts-travel-plan-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 14322:14322
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  # ts-news-service:
+  #   build: ts-news-service-unused
+  #   image: ${IMG_REPO}/ts-news-service:${IMG_TAG}
+  #   restart: always
+  #   ports:
+  #     - 12862:12862
+  #   networks:
+  #     - my-network
+  #   depends_on:
+  #     ts-mysql:
+  #       condition: service_healthy
+  #     nacos:
+  #       condition: service_healthy
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-route-plan-service:
+    build: ts-route-plan-service
+    image: ${IMG_REPO}/ts-route-plan-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 14578:14578
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-food-service:
+    build: ts-food-service
+    image: ${IMG_REPO}/ts-food-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 18856:18856
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+      FOOD_MYSQL_USER: 'root'
+      FOOD_MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-consign-service:
+    build: ts-consign-service
+    image: ${IMG_REPO}/ts-consign-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 16111:16111
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+      CONSIGN_MYSQL_USER: 'root'
+      CONSIGN_MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-consign-price-service:
+    build: ts-consign-price-service
+    image: ${IMG_REPO}/ts-consign-price-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 16110:16110
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-admin-basic-info-service:
+    build: ts-admin-basic-info-service
+    image: ${IMG_REPO}/ts-admin-basic-info-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 18767:18767
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-admin-order-service:
+    build: ts-admin-order-service
+    image: ${IMG_REPO}/ts-admin-order-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 16112:16112
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-admin-route-service:
+    build: ts-admin-route-service
+    image: ${IMG_REPO}/ts-admin-route-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 16113:16113
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+                
+
+  ts-admin-travel-service:
+    build: ts-admin-travel-service
+    image: ${IMG_REPO}/ts-admin-travel-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 16114:16114
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+                  
+
+  ts-admin-user-service:
+    build: ts-admin-user-service
+    image: ${IMG_REPO}/ts-admin-user-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 16115:16115
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      resources:
+          limits:
+            memory: ${SERVICE_MEMORY_LIMIT}
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'      
+
+  ts-delivery-service:
+    build: ts-delivery-service
+    image: ${IMG_REPO}/ts-delivery-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 18808:18808
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-food-delivery-service:
+    build: ts-food-delivery-service
+    image: ${IMG_REPO}/ts-food-delivery-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 18957:18957
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+      FOOD_DELIVERY_MYSQL_USER: 'root'
+      FOOD_DELIVERY_MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-station-food-service:
+    build: ts-station-food-service
+    image: ${IMG_REPO}/ts-station-food-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 18855:18855
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+      FOOD_MYSQL_USER: 'root'
+      FOOD_MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      STATION_FOOD_MYSQL_HOST: 'ts-station-food-mysql'
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-train-food-service:
+    build: ts-train-food-service
+    image: ${IMG_REPO}/ts-train-food-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 19999:19999
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+      TRAIN_FOOD_MYSQL_USER: 'root'
+      TRAIN_FOOD_MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-wait-order-service:
+    build: ts-wait-order-service
+    image: ${IMG_REPO}/ts-wait-order-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 17525:17525
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+      WAIT_ORDER_MYSQL_HOST: 'ts-wait-order-mysql'
+      WAIT_ORDER_MYSQL_USER: 'root'
+      WAIT_ORDER_MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-avatar-service:
+    build: ts-avatar-service
+    image: ${IMG_REPO}/ts-avatar-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 17001:17001
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+  ts-ticket-office-service:
+    build: ts-ticket-office-service
+    image: ${IMG_REPO}/ts-ticket-office-service:${IMG_TAG}
+    restart: always
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+      TICKET_OFFICE_MYSQL_HOST: 'ts-ticket-office-mysql'
+      TICKET_OFFICE_MYSQL_PORT: '3306'
+      TICKET_OFFICE_MYSQL_USER: 'root'
+      TICKET_OFFICE_MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      TICKET_OFFICE_MYSQL_DATABASE: 'ts-ticket-office-mysql'
+    ports:
+      - 16108:16108
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+      
+  ts-voucher-service:
+    build: ts-voucher-service
+    image: ${IMG_REPO}/ts-voucher-service:${IMG_TAG}
+    restart: always
+    ports:
+      - 16101:16101
+    networks:
+      - my-network
+    depends_on:
+      ts-mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    environment:
+      NACOS_ADDRS: 'nacos:8848'
+      ORDER_SERVICE_URL: 'http://ts-order-service:12031'
+      ORDER_OTHER_SERVICE_URL: 'http://ts-order-other-service:12032'
+      VOUCHER_MYSQL_HOST: 'ts-order-mysql'
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT}
+
+
+networks:
+  my-network:
+    # driver: overlay
+    driver: bridge

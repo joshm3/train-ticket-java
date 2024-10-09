@@ -1,15 +1,8 @@
-FROM python:3
+FROM openjdk:8-jre
 
 RUN /bin/cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo 'Asia/Shanghai' >/etc/timezone
 
-RUN mkdir -p /app
-WORKDIR /app
-
-COPY requirements.txt ./
-RUN pip install cryptography
-RUN pip install --no-cache-dir -r requirements.txt
-
-ADD ./server.py /app/
-CMD [ "python", "server.py" ]
+ADD ./target/ts-voucher-service-1.0.jar /app/
+CMD ["java", "-Xmx200m",  "-jar", "/app/ts-voucher-service-1.0.jar"]
 
 EXPOSE 16101

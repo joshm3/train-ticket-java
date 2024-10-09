@@ -1,19 +1,8 @@
-FROM python:3
+FROM openjdk:8-jre
 
 RUN /bin/cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo 'Asia/Shanghai' >/etc/timezone
 
-RUN apt update -y
-RUN apt install -y cmake
-RUN apt install -y libgl1-mesa-glx
-
-ENV PYTHONUNBUFFERED=TRUE
-
-RUN mkdir -p /app
-ADD . /app/
-WORKDIR /app
-
-RUN pip install -r requirements.txt
-
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:17001", "app:app"]
+ADD ./target/ts-avatar-service-1.0.jar /app/
+CMD ["java", "-Xmx200m",  "-jar", "/app/ts-avatar-service-1.0.jar"]
 
 EXPOSE 17001
