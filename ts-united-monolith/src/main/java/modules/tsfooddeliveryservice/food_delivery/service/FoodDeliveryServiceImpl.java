@@ -43,7 +43,7 @@ public class FoodDeliveryServiceImpl implements FoodDeliveryService {
     public Response createFoodDeliveryOrder(FoodDeliveryOrder fd, HttpHeaders headers) {
         String stationFoodStoreId = fd.getStationFoodStoreId();
         String staion_food_service_url = getServiceUrl("ts-station-food-service");
-        // staion_food_service_url = "http://ts-station-food-service"; // ??
+        // staion_food_service_url = "http://ts-station-food-service"; // 测试
         ResponseEntity<Response<StationFoodStoreInfo>> getStationFoodStore = tsfooddeliveryserviceClient.getApiV1StationfoodserviceStationfoodstoresBystoreidPathvariable(fd.getStationFoodStoreId(), headers);
         Response<StationFoodStoreInfo> result = getStationFoodStore.getBody();
         StationFoodStoreInfo stationFoodStoreInfo = result.getData();

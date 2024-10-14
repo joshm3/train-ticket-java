@@ -92,7 +92,7 @@ public class FoodServiceImpl implements FoodService {
             String deliveryJson = JsonUtils.object2Json(delivery);
             deliveryJsons.add(deliveryJson);
         }
-        // ??????
+        // 批量发送消息
         for (String deliveryJson : deliveryJsons) {
             LOGGER.info("[createFoodOrdersInBatch][AddFoodOrder][delivery info send to mq][delivery info: {}]", deliveryJson);
             try {
@@ -222,7 +222,7 @@ public class FoodServiceImpl implements FoodService {
             FoodServiceImpl.LOGGER.error("[getAllFood][reGetTrainFoodListResult][Get the Get Food Request Failed!][date: {}, tripId: {}]", date, tripId);
             return new Response(0, "Get the Get Food Request Failed!", null);
         }
-        // ???????
+        // 车次途经的车站
         /**
          * --------------------------------------------------------------------------------------
          */
@@ -233,7 +233,7 @@ public class FoodServiceImpl implements FoodService {
         if (stationResult.getStatus() == 1) {
             Route route = stationResult.getData();
             List<String> stations = route.getStations();
-            // ?????????????????
+            // 去除不经过的站，如果起点终点有的话
             if ((null != startStation) && (!"".equals(startStation))) {
                 /**
                  * --------------------------------------------------------------------------------------

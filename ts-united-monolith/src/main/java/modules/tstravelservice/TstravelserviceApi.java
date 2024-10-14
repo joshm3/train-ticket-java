@@ -13,22 +13,6 @@ public class TstravelserviceApi {
     @Autowired
     TravelController travelController;
 
-    public HttpEntity postApiV1TravelserviceTrip_detail(TripAllDetailInfo gtdi, HttpHeaders headers) {
-        return travelController.getTripAllDetailInfo(gtdi, headers);
-    }
-
-    public HttpEntity getApiV1TravelserviceAdmin_trip(HttpHeaders headers) {
-        return travelController.adminQueryAll(headers);
-    }
-
-    public HttpEntity postApiV1TravelserviceTripsRoutes(ArrayList<String> routeIds, HttpHeaders headers) {
-        return travelController.getTripsByRouteId(routeIds, headers);
-    }
-
-    public HttpEntity getApiV1TravelserviceRoutesPathvariable(String tripId, HttpHeaders headers) {
-        return travelController.getRouteByTripId(tripId, headers);
-    }
-
     public HttpEntity putApiV1TravelserviceTrips(TravelInfo info, HttpHeaders headers) {
         return travelController.updateTrip(info, headers);
     }
@@ -43,5 +27,21 @@ public class TstravelserviceApi {
 
     public HttpEntity postApiV1TravelserviceTripsLeft(TripInfo info, HttpHeaders headers) {
         return travelController.queryInfo(info, headers);
+    }
+
+    public HttpEntity postApiV1TravelserviceTrip_detail(TripAllDetailInfo gtdi, HttpHeaders headers) {
+        return travelController.getTripAllDetailInfo(gtdi, headers);
+    }
+
+    public HttpEntity getApiV1TravelserviceAdmin_trip(HttpHeaders headers) {
+        return travelController.adminQueryAll(headers);
+    }
+
+    public HttpEntity postApiV1TravelserviceTripsRoutes(ArrayList<String> routeIds, HttpHeaders headers) {
+        return travelController.getTripsByRouteId(routeIds, headers);
+    }
+
+    public HttpEntity getApiV1TravelserviceRoutesPathvariable(String tripId, HttpHeaders headers) {
+        return travelController.getRouteByTripId(tripId, headers);
     }
 }

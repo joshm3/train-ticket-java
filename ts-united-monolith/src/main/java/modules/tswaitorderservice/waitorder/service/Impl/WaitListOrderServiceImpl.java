@@ -51,10 +51,10 @@ public class WaitListOrderServiceImpl implements WaitListOrderService {
         LOGGER.info("[create][Create Wait Order][Ready to Create Wait Order]");
         Response<WaitListOrder> response = saveNewOrder(orderVO, headers);
         if (response.getStatus() == 0) {
-            // ??????????
+            // 未能正常保存到数据库
             return response;
         } else {
-            // ??????? ????
+            // 已保存到数据库 开始轮询
             return triggerThread(response.getData(), orderVO, headers);
         }
     }

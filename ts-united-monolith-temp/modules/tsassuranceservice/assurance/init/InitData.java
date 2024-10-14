@@ -26,9 +26,9 @@ public class InitData implements CommandLineRunner {
         repository.save(assurance1);
 
         Assurance res1=repository.findById(id).get();
-        System.out.println("ID: " + id + "  orderID: " + res1.getOrderId());  //??ID?? ? ??orderID
+        System.out.println("ID: " + id + "  orderID: " + res1.getOrderId());  //根据ID查找 ， 打印orderID
         Assurance res2=repository.findByOrderId(res1.getOrderId());
-        System.out.println("ID: " + res2.getId() + "  orderID: " + res1.getOrderId());  //??orderID?? ? ??ID
+        System.out.println("ID: " + res2.getId() + "  orderID: " + res1.getOrderId());  //根据orderID查找 ， 打印ID
 
         Assurance assurance2=new Assurance();
         String id2="ff8080817b3e4c27017b3e4c3bee1111";
@@ -36,15 +36,15 @@ public class InitData implements CommandLineRunner {
         assurance2.setType(AssuranceType.TRAFFIC_ACCIDENT);
         repository.save(assurance2);
 
-        ArrayList<Assurance> res3 = repository.findAll();  //????
+        ArrayList<Assurance> res3 = repository.findAll();  //查找所有
         System.out.println("num: " + res3.size());
 
-        repository.deleteById(res3.get(0).getId());  //?ID?????
+        repository.deleteById(res3.get(0).getId());  //用ID删除第一个
         System.out.println("delete successfully");
-        repository.removeAssuranceByOrderId(res3.get(1).getOrderId());   //?orderID?????
+        repository.removeAssuranceByOrderId(res3.get(1).getOrderId());   //用orderID删除第二个
         System.out.println("delete successfully");
 
-        //??service
+        //测试service
         String id_1 = UUID.randomUUID().toString();
         Response r_1 = service.create(1,id_1,null);  //create
         Assurance assurance_1 = (Assurance)r_1.getData();
@@ -61,7 +61,7 @@ public class InitData implements CommandLineRunner {
         List<AssuranceTypeBean> data_2 = (List<AssuranceTypeBean>)r_4.getData();
         System.out.println(data_2.size());
 
-        service.modify(assurance_2.getId(),assurance_2.getOrderId(),2,null);  //modify???2??????error
+        service.modify(assurance_2.getId(),assurance_2.getOrderId(),2,null);  //modify实际上2不存在日志中error
 
         service.deleteById(UUID.fromString(assurance_1.getId()),null);   //deleteById
         service.deleteByOrderId(UUID.fromString(assurance_2.getOrderId()),null);  //deleteByOrderId

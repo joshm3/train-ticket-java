@@ -331,12 +331,12 @@ public class TravelServiceImpl implements TravelService {
         calendarStart.setTime(StringUtils.String2Date(trip.getStartTime()));
         calendarStart.add(Calendar.MINUTE, minutesStart);
         response.setStartTime(StringUtils.Date2String(calendarStart.getTime()));
-        TravelServiceImpl.LOGGER.info("[getTickets][Calculate distance][calculate time?{}  time: {}]", minutesStart, calendarStart.getTime());
+        TravelServiceImpl.LOGGER.info("[getTickets][Calculate distance][calculate time：{}  time: {}]", minutesStart, calendarStart.getTime());
         Calendar calendarEnd = Calendar.getInstance();
         calendarEnd.setTime(StringUtils.String2Date(trip.getStartTime()));
         calendarEnd.add(Calendar.MINUTE, minutesEnd);
         response.setEndTime(StringUtils.Date2String(calendarEnd.getTime()));
-        TravelServiceImpl.LOGGER.info("[getTickets][Calculate distance][calculate time?{}  time: {}]", minutesEnd, calendarEnd.getTime());
+        TravelServiceImpl.LOGGER.info("[getTickets][Calculate distance][calculate time：{}  time: {}]", minutesEnd, calendarEnd.getTime());
         response.setTripId(trip.getTripId());
         response.setTrainTypeName(trip.getTrainTypeName());
         response.setPriceForConfortClass(tr.getPrices().get("confortClass"));
@@ -383,7 +383,7 @@ public class TravelServiceImpl implements TravelService {
     }
 
     private Route getRouteByRouteId(String routeId, HttpHeaders headers) {
-        TravelServiceImpl.LOGGER.debug("[getRouteByRouteId][Get Route By Id][Route ID?{}]", routeId);
+        TravelServiceImpl.LOGGER.debug("[getRouteByRouteId][Get Route By Id][Route ID：{}]", routeId);
         HttpEntity requestEntity = new HttpEntity(null);
         String route_service_url = getServiceUrl("ts-route-service");
         ResponseEntity<Response> re = restTemplate.exchange((route_service_url + "/api/v1/routeservice/routes/") + routeId, HttpMethod.GET, requestEntity, Response.class);

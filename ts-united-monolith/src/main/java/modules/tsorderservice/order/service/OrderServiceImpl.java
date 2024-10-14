@@ -66,7 +66,7 @@ public class OrderServiceImpl implements OrderService {
             OrderServiceImpl.LOGGER.info("[getSoldTickets][Left ticket info][info is: {}]", leftTicketInfo.toString());
             return new Response(1, success, leftTicketInfo);
         } else {
-            OrderServiceImpl.LOGGER.warn("[getSoldTickets][Seat][Left ticket info is empty][seat from date: {}, train number: {}]", seatRequest.getTravelDate(), seatRequest.getTrainNumber());// warn????????????
+            OrderServiceImpl.LOGGER.warn("[getSoldTickets][Seat][Left ticket info is empty][seat from date: {}, train number: {}]", seatRequest.getTravelDate(), seatRequest.getTrainNumber());// warn级别，获取资源但资源为空
 
             return new Response(0, "Order is Null.", null);
         }
@@ -76,12 +76,12 @@ public class OrderServiceImpl implements OrderService {
     public Response findOrderById(String id, HttpHeaders headers) {
         Optional<Order> op = orderRepository.findById(id);
         if (!op.isPresent()) {
-            OrderServiceImpl.LOGGER.warn("[findOrderById][Find Order By Id Fail][No content][id: {}] ", id);// ?????????
+            OrderServiceImpl.LOGGER.warn("[findOrderById][Find Order By Id Fail][No content][id: {}] ", id);// 获取资源但资源为空
 
             return new Response(0, "No Content by this id", null);
         } else {
             Order order = op.get();
-            OrderServiceImpl.LOGGER.warn("[findOrderById][Find Order By Id Success][id: {}] ", id);// ?????????
+            OrderServiceImpl.LOGGER.warn("[findOrderById][Find Order By Id Success][id: {}] ", id);// 获取资源但资源为空
 
             return new Response(1, success, order);
         }

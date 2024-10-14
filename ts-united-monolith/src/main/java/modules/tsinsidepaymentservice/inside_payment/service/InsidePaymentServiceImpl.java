@@ -72,7 +72,7 @@ public class InsidePaymentServiceImpl implements InsidePaymentService {
             payment.setOrderId(info.getOrderId());
             payment.setPrice(order.getPrice());
             payment.setUserId(userId);
-            // ????????????????????
+            // 判断一下账户余额够不够，不够要去站外支付
             List<PaymentFromtsinsidepaymentservice> payments = paymentRepository.findByUserId(userId);
             List<MoneyFromtsinsidepaymentservice> addMonies = addMoneyRepository.findByUserId(userId);
             Iterator<PaymentFromtsinsidepaymentservice> paymentsIterator = payments.iterator();
@@ -89,13 +89,13 @@ public class InsidePaymentServiceImpl implements InsidePaymentService {
                 money = money.add(new BigDecimal(addMoney.getMoney()));
             } 
             if (totalExpand.compareTo(money) > 0) {
-                // ????
+                // 站外支付
                 PaymentFromtsinsidepaymentservice outsidePaymentInfo = new PaymentFromtsinsidepaymentservice();
                 outsidePaymentInfo.setOrderId(info.getOrderId());
                 outsidePaymentInfo.setUserId(userId);
                 outsidePaymentInfo.setPrice(order.getPrice());
                 /**
-                 * **?????????**
+                 * **这里调用第三方支付**
                  */
                 HttpEntity requestEntityOutsidePaySuccess = new HttpEntity(outsidePaymentInfo, headers);
                 String payment_service_url = getServiceUrl("ts-payment-service");
@@ -259,7 +259,7 @@ public class InsidePaymentServiceImpl implements InsidePaymentService {
             money.add(new BigDecimal(addMoney.getMoney()));
         } 
         if (totalExpand.compareTo(money) > 0) {
-            // ????
+            // 站外支付
             PaymentFromtsinsidepaymentservice outsidePaymentInfo = new PaymentFromtsinsidepaymentservice();
             outsidePaymentInfo.setOrderId(info.getOrderId());
             outsidePaymentInfo.setUserId(userId);

@@ -14,14 +14,14 @@ import javax.validation.constraints.NotNull;
 public class Assurance {
     @Id
     @Column(name = "assurance_id")
-    private String id;// ??
+    private String id;// 主键
 
 
     /**
      * which order the assurance is related to
      */
     @NotNull
-    private String orderId;// ?????????
+    private String orderId;// 这个保险关联的订单
 
 
     /**

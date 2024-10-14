@@ -47,7 +47,7 @@ public class PollThread extends Thread {
             }
             Response postResult = doPreserve(service_url, requestEntityPreserve);
             if (postResult.getStatus() == 0) {
-                // ????
+                // 预定失败
                 try {
                     TimeUnit.MINUTES.sleep(INTERVAL_MINUTES);
                 } catch (InterruptedException e) {

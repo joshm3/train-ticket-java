@@ -357,7 +357,7 @@ public class BasicServiceImpl implements BasicService {
     }
 
     private List<Route> getRoutesByRouteIds(List<String> routeIds, HttpHeaders headers) {
-        BasicServiceImpl.LOGGER.info("[getRoutesByRouteIds][Get Route By Ids][Route IDs?{}]", routeIds);
+        BasicServiceImpl.LOGGER.info("[getRoutesByRouteIds][Get Route By Ids][Route IDs：{}]", routeIds);
         HttpEntity requestEntity = new HttpEntity(routeIds, null);
         String route_service_url = getServiceUrl("ts-route-service");
         ResponseEntity<Response> re = tsbasicserviceClient.postApiV1RouteserviceRoutesByids(routeIds, null);
@@ -373,7 +373,7 @@ public class BasicServiceImpl implements BasicService {
     }
 
     private Route getRouteByRouteId(String routeId, HttpHeaders headers) {
-        BasicServiceImpl.LOGGER.info("[getRouteByRouteId][Get Route By Id][Route ID?{}]", routeId);
+        BasicServiceImpl.LOGGER.info("[getRouteByRouteId][Get Route By Id][Route ID：{}]", routeId);
         HttpEntity requestEntity = new HttpEntity(null);
         String route_service_url = getServiceUrl("ts-route-service");
         ResponseEntity<Response> re = tsbasicserviceClient.getApiV1RouteserviceRoutesPathvariable(routeId, null);
