@@ -12,22 +12,6 @@ services:
     networks:
       - my-network
 
-#   # kafka:
-#   #   container_name: kafka
-#   #   image: spotify/kafka:latest
-#   #   ports:
-#   #    - 2181:2181
-#   #    - 9092:9092
-#   #   networks:
-#   #     - my-network
-
-#   #  zipkin:
-#   #    image: openzipkin/zipkin
-#   #    ports:
-#   #      - 9411:9411
-#   #    networks:
-#   #      - my-network
-
   nacos:
     image: nacos/nacos-server:2.0.1
     container_name: nacos
@@ -88,32 +72,13 @@ services:
       resources:
         limits:
           memory: ${SERVICE_MEMORY_LIMIT}
-
-  ts-gateway-service:
-    build: ts-gateway-service-united
-    image: ${IMG_REPO}/ts-gateway-service:${IMG_TAG}
-    restart: always
-    ports:
-      - 18888:18888
-    networks:
-      - my-network
-    depends_on:
-      ts-mysql:
-        condition: service_healthy
-      nacos:
-        condition: service_healthy
-    environment:
-      NACOS_ADDRS: 'nacos:8848'
-    deploy:
-      resources:
-        limits:
-          memory: ${SERVICE_MEMORY_LIMIT}
   
   ts-united-monolith:
     build: ts-united-monolith
     image: ${IMG_REPO}/ts-united-monolith:${IMG_TAG}
     restart: always
     ports:
+      - 18888:18888
       - 16115:16115
       - 17101:17001
       - 16108:16108
@@ -171,6 +136,7 @@ services:
         - ts-avatar-service
         - ts-ticket-office-service
         - ts-voucher-service
+        - ts-gateway-service
     depends_on:
       ts-mysql:
         condition: service_healthy
@@ -180,7 +146,6 @@ services:
       NACOS_ADDRS: 'nacos:8848' 
       test_send_mail_user: 'default_mail_user'
       rabbitmq_host: 'rabbitmq'
-
 
 networks:
   my-network:

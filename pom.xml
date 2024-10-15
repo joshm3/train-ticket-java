@@ -125,8 +125,6 @@
         <profile>
             <id>united</id>
             <modules>
-                <module>ts-gateway-service-united</module>
-
                 <module>ts-united-monolith</module>
             </modules>
         </profile>

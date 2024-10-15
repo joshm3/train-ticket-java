@@ -1,5 +1,5 @@
 server:
-  port: 16115
+  port: 18888
   additionalPorts: 17001,16108,16101
 
 spring:
